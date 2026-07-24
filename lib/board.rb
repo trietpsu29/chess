@@ -18,6 +18,28 @@ class Board
     @grid = default_board
   end
 
+  def display
+    8.downto(1) do |row|
+      print "#{row} "
+
+      ('a'..'h').each do |col|
+        piece = @grid[:"#{col}#{row}"]
+
+        if piece.nil?
+          print '. '
+        else
+          print "#{piece.symbol} "
+        end
+      end
+
+      puts
+    end
+
+    print '  '
+    ('a'..'h').each { |col| print "#{col} " }
+    puts
+  end
+
   private
 
   def default_board
