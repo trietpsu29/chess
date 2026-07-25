@@ -14,6 +14,28 @@ class Board
     setup_piece
   end
 
+  def check_block_move?(start, des)
+    start_color = @grid[start].color
+    start_col = start[0].ord
+    des_col = des[0].ord
+    start_row = start[1].to_i
+    des_row = des[1].to_i
+
+    factor_col = start_color == :white ? 1 : -1
+    factor_row = start_col < des_col ? 1 : -1
+    factor_dig = start_col != des_col && start_row != des_row ? true : false
+    curr_col = start_col
+    curr_row = start_row
+    loop do
+      curr_row += factor_col if start_col == des_col || factor_dig
+      curr_col += factor_row if start_row == des_row || factor_dig
+      curr = @grid["#{curr_col.chr}#{curr_row.to_i}"]
+      break if curr == @grid[des]
+      return true unless curr.nil?
+    end
+    false
+  end
+
   def check_valid_move?(start, des)
     return false if @grid[start].nil?
     return false if start == des
