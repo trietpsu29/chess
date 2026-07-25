@@ -1,7 +1,7 @@
 require_relative '../lib/pawn'
 describe Pawn do
   describe '#check_dig_move?' do
-    let(:pawn) { Pawn.new(:white) }
+    subject(:pawn) { described_class.new(:white) }
 
     it 'returns false when destination is empty' do
       expect(pawn.check_dig_move?('e2', 'f3', nil)).to be false
