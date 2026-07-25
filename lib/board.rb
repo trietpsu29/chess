@@ -14,6 +14,21 @@ class Board
     setup_piece
   end
 
+  def check_valid_move?(start, des)
+    return false if @grid[start].nil?
+    return false if start == des
+    return false unless @grid[start].check_piece_move?
+    return false if @grid[start].color == @grid[des].color
+    return false if !@grid[start].is_a?(Knight) && check_block_move?
+
+    true
+  end
+
+  def move_piece(start, des)
+    @grid[des] = @grid[start]
+    @grid[start] = nil
+  end
+
   def clear
     @grid = default_board
   end
@@ -23,7 +38,7 @@ class Board
       print "#{row} "
 
       ('a'..'h').each do |col|
-        piece = @grid[:"#{col}#{row}"]
+        piece = @grid["#{col}#{row}"]
 
         if piece.nil?
           print '. '
@@ -46,7 +61,7 @@ class Board
     board = {}
     ('a'..'h').each do |col|
       (1..8).each do |row|
-        board[:"#{col}#{row}"] = nil
+        board["#{col}#{row}"] = nil
       end
     end
     board
