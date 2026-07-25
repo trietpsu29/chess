@@ -13,10 +13,11 @@ class Pawn < Piece
 
     start_row = start[1].to_i
     des_row = des[1].to_i
-    diff = abs(start_row - des_row)
+    diff = (start_row - des_row).abs
     return false if factor_dig && diff != 1
     return false if diff > 2
     return false if diff > 1 && start_row != 2 && start_row != 7
+    return false if diff == 1 && !des_color.nil? && !factor_dig && des_color != @color
 
     return false if @color == :white && start_row > des_row
     return false if @color == :black && start_row < des_row
@@ -29,7 +30,9 @@ class Pawn < Piece
 
     start_col = start[0].ord
     des_col = des[0].ord
-    diff = abs(start_col - des_col)
-    false if diff != 1
+    diff = (start_col - des_col).abs
+    return false if diff != 1
+
+    true
   end
 end
