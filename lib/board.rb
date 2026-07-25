@@ -37,11 +37,16 @@ class Board
   end
 
   def check_valid_move?(start, des)
-    return false if @grid[start].nil?
+    start_v = @grid[start]
+    des_v = @grid[des]
+
+    return false if start_v.nil?
     return false if start == des
-    return false unless @grid[start].check_piece_move?
-    return false if @grid[start].color == @grid[des].color
-    return false if !@grid[start].is_a?(Knight) && check_block_move?
+
+    des_color = des_v.nil? ? nil : des_v.color
+    return false if start_v.color == des_color
+    return false unless start_v.check_piece_move?(start, des, des_color)
+    return false if !start_v.is_a?(Knight) && check_block_move?
 
     true
   end
