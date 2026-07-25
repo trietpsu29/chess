@@ -7,7 +7,7 @@ class Pawn < Piece
     @symbol = color == :white ? '♙' : '♟'
   end
 
-  def check_valid_move?(start, des, des_color)
+  def check_piece_move?(start, des, des_color)
     factor_dig = !(start[0] == des[0])
     return false if factor_dig && !check_dig_move?(start, des, des_color)
 

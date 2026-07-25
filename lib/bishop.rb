@@ -7,7 +7,7 @@ class Bishop < Piece
     @symbol = color == :white ? '♗' : '♝'
   end
 
-  def check_piece_move(start, des, _des_color)
+  def check_piece_move?(start, des, _des_color)
     start_row = start[1].to_i
     des_row = des[1].to_i
     start_col = start[0].ord
