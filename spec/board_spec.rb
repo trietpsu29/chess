@@ -43,17 +43,56 @@ describe Board do
     end
   end
 
+  describe '#check_inside_move?' do
+    it 'returns true when both positions are inside the board' do
+      expect(board.check_inside_move?('a1', 'h8')).to be true
+    end
+
+    it 'returns false when start column is outside the board' do
+      expect(board.check_inside_move?('i1', 'h8')).to be false
+    end
+
+    it 'returns false when start row is outside the board' do
+      expect(board.check_inside_move?('a9', 'h8')).to be false
+    end
+
+    it 'returns false when destination column is outside the board' do
+      expect(board.check_inside_move?('a1', 'i8')).to be false
+    end
+
+    it 'returns false when destination row is outside the board' do
+      expect(board.check_inside_move?('a1', 'h9')).to be false
+    end
+
+    it 'returns false when position length is not two characters' do
+      expect(board.check_inside_move?('a', 'h8')).to be false
+      expect(board.check_inside_move?('a1', 'h')).to be false
+    end
+  end
+
   describe '#check_valid_move?' do
     let(:piece) { instance_double(Rook) }
 
+    it 'returns false when move position is outside the board' do
+      expect(board.check_valid_move?(:white, 'a1', 'a9')).to be false
+    end
+
+    it 'returns false when piece does not belong to current player' do
+      piece = Rook.new(:black)
+
+      board.grid['a1'] = piece
+
+      expect(board.check_valid_move?(:white, 'a1', 'a8')).to be false
+    end
+
     it 'returns false when the start square is empty' do
-      expect(board.check_valid_move?('a1', 'a2')).to be false
+      expect(board.check_valid_move?(:white, 'a1', 'a2')).to be false
     end
 
     it 'returns false when start equals destination' do
       board.grid['a1'] = piece
 
-      expect(board.check_valid_move?('a1', 'a1')).to be false
+      expect(board.check_valid_move?(:white, 'a1', 'a1')).to be false
     end
 
     it 'returns false when destination contains a friendly piece' do
@@ -62,7 +101,7 @@ describe Board do
       board.grid['a1'] = piece
       board.grid['a2'] = Pawn.new(:white)
 
-      expect(board.check_valid_move?('a1', 'a2')).to be false
+      expect(board.check_valid_move?(:white, 'a1', 'a2')).to be false
     end
 
     it 'calls check_piece_move?' do
@@ -73,7 +112,16 @@ describe Board do
 
       expect(piece).to receive(:check_piece_move?)
 
-      board.check_valid_move?('a1', 'a2')
+      board.check_valid_move?(:white, 'a1', 'a2')
+    end
+
+    it 'returns false when the piece movement is invalid' do
+      allow(piece).to receive(:color).and_return(:white)
+      allow(piece).to receive(:check_piece_move?).and_return(false)
+
+      board.grid['a1'] = piece
+
+      expect(board.check_valid_move?(:white, 'a1', 'a8')).to be false
     end
 
     it 'returns false when the path is blocked' do
@@ -84,7 +132,7 @@ describe Board do
 
       allow(board).to receive(:check_block_move?).and_return(true)
 
-      expect(board.check_valid_move?('a1', 'a8')).to be false
+      expect(board.check_valid_move?(:white, 'a1', 'a8')).to be false
     end
 
     it 'does not check blocking pieces for a knight' do
@@ -96,7 +144,7 @@ describe Board do
 
       expect(board).not_to receive(:check_block_move?)
 
-      board.check_valid_move?('b1', 'c3')
+      board.check_valid_move?(:white, 'b1', 'c3')
     end
 
     it 'returns true for a valid move' do
@@ -107,7 +155,7 @@ describe Board do
 
       allow(board).to receive(:check_block_move?).and_return(false)
 
-      expect(board.check_valid_move?('a1', 'a8')).to be true
+      expect(board.check_valid_move?(:white, 'a1', 'a8')).to be true
     end
   end
 end

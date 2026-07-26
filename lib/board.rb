@@ -35,12 +35,24 @@ class Board
     false
   end
 
-  def check_valid_move?(start, des)
+  def check_inside_move?(start, des)
+    return false unless start.length == 2
+    return false unless des.length == 2
+
+    ('a'..'h').include?(start[0]) &&
+      ('1'..'8').include?(start[1]) &&
+      ('a'..'h').include?(des[0]) &&
+      ('1'..'8').include?(des[1])
+  end
+
+  def check_valid_move?(player, start, des)
     start_v = @grid[start]
     des_v = @grid[des]
+    return false unless check_inside_move?(start, des)
 
     return false if start_v.nil?
     return false if start == des
+    return false if start_v.color != player
 
     des_color = des_v.nil? ? nil : des_v.color
     return false if start_v.color == des_color
@@ -51,8 +63,6 @@ class Board
   end
 
   def move_piece(start, des)
-    return unless check_valid_move?
-
     @grid[des] = @grid[start]
     @grid[start] = nil
   end
