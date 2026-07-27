@@ -231,70 +231,99 @@ describe Board do
     end
   end
 
-  require_relative '../lib/board'
+  describe '#check_promo' do
+    it 'returns false when the piece is not a pawn' do
+      board.grid['a7'] = Queen.new(:white)
 
-  describe Board do
-    subject(:board) { described_class.new }
+      expect(board.check_promo(:white, 'a7', 'a8')).to be false
+    end
 
+    it 'returns true when black pawn reaches rank 1' do
+      board.grid['a2'] = Pawn.new(:black)
+
+      expect(board.check_promo(:black, 'a2', 'a1')).to be true
+    end
+
+    it 'returns true when white pawn reaches rank 8' do
+      board.grid['a7'] = Pawn.new(:white)
+
+      expect(board.check_promo(:white, 'a7', 'a8')).to be true
+    end
+
+    it 'returns false when pawn has not reached promotion rank' do
+      board.grid['a6'] = Pawn.new(:white)
+
+      expect(board.check_promo(:white, 'a6', 'a7')).to be false
+    end
+  end
+
+  describe '#promo_pawn' do
     before do
-      board.clear
+      board.grid['a8'] = Pawn.new(:white)
     end
 
-    describe '#check_promo' do
-      it 'returns false when the piece is not a pawn' do
-        board.grid['a7'] = Queen.new(:white)
+    it 'promotes pawn to queen' do
+      board.promo_pawn('a8', 'Q')
 
-        expect(board.check_promo(:white, 'a7', 'a8')).to be false
-      end
-
-      it 'returns true when black pawn reaches rank 1' do
-        board.grid['a2'] = Pawn.new(:black)
-
-        expect(board.check_promo(:black, 'a2', 'a1')).to be true
-      end
-
-      it 'returns true when white pawn reaches rank 8' do
-        board.grid['a7'] = Pawn.new(:white)
-
-        expect(board.check_promo(:white, 'a7', 'a8')).to be true
-      end
-
-      it 'returns false when pawn has not reached promotion rank' do
-        board.grid['a6'] = Pawn.new(:white)
-
-        expect(board.check_promo(:white, 'a6', 'a7')).to be false
-      end
+      expect(board.grid['a8']).to be_a(Queen)
+      expect(board.grid['a8'].color).to eq(:white)
     end
 
-    describe '#promo_pawn' do
-      before do
-        board.grid['a8'] = Pawn.new(:white)
-      end
+    it 'promotes pawn to rook' do
+      board.promo_pawn('a8', 'R')
 
-      it 'promotes pawn to queen' do
-        board.promo_pawn('a8', 'Q')
+      expect(board.grid['a8']).to be_a(Rook)
+    end
 
-        expect(board.grid['a8']).to be_a(Queen)
-        expect(board.grid['a8'].color).to eq(:white)
-      end
+    it 'promotes pawn to bishop' do
+      board.promo_pawn('a8', 'B')
 
-      it 'promotes pawn to rook' do
-        board.promo_pawn('a8', 'R')
+      expect(board.grid['a8']).to be_a(Bishop)
+    end
 
-        expect(board.grid['a8']).to be_a(Rook)
-      end
+    it 'promotes pawn to knight' do
+      board.promo_pawn('a8', 'N')
 
-      it 'promotes pawn to bishop' do
-        board.promo_pawn('a8', 'B')
+      expect(board.grid['a8']).to be_a(Knight)
+    end
+  end
 
-        expect(board.grid['a8']).to be_a(Bishop)
-      end
+  describe '#serialize' do
+    it 'returns board data in serializable format' do
+      board.grid['a1'] = Rook.new(:white)
+      board.grid['e8'] = King.new(:black)
 
-      it 'promotes pawn to knight' do
-        board.promo_pawn('a8', 'N')
+      data = board.serialize
 
-        expect(board.grid['a8']).to be_a(Knight)
-      end
+      expect(data['white_king_pos']).to eq(board.white_king_pos)
+      expect(data['black_king_pos']).to eq(board.black_king_pos)
+
+      expect(data['grid']['a1']).to eq('white_rook')
+      expect(data['grid']['e8']).to eq('black_king')
+    end
+  end
+
+  describe '#deserialize' do
+    it 'restores board state from serialized data' do
+      data = {
+        'white_king_pos' => 'e1',
+        'black_king_pos' => 'e8',
+        'grid' => {
+          'a1' => 'white_rook',
+          'e8' => 'black_king'
+        }
+      }
+
+      board.deserialize(data)
+
+      expect(board.white_king_pos).to eq('e1')
+      expect(board.black_king_pos).to eq('e8')
+
+      expect(board.grid['a1']).to be_a(Rook)
+      expect(board.grid['a1'].color).to eq(:white)
+
+      expect(board.grid['e8']).to be_a(King)
+      expect(board.grid['e8'].color).to eq(:black)
     end
   end
 end

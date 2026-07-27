@@ -1,10 +1,12 @@
 require_relative 'board'
+require 'json'
 
 class Game
-  attr_accessor :board
+  attr_accessor :board, :turn
 
   def initialize
     @board = Board.new
+    @turn = :white
   end
 
   def check?(player, king_pos)
@@ -31,5 +33,16 @@ class Game
       return false unless check_king
     end
     true
+  end
+
+  def save
+    File.write('save.json', JSON.dump({ turn: @turn,
+                                        board: @board.serialize }))
+  end
+
+  def load(string)
+    data = JSON.load(string)
+    @turn = data['turn']
+    @board.deserialize(data['board'])
   end
 end

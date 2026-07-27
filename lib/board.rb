@@ -9,10 +9,10 @@ require_relative 'piece'
 class Board
   attr_accessor :grid, :white_king_pos, :black_king_pos
 
-  def initialize
-    @white_king_pos = 'e1'
-    @black_king_pos = 'e8'
-    @grid = default_board
+  def initialize(white_king_pos = 'e1', black_king_pos = 'e8', grid = {})
+    @white_king_pos = white_king_pos
+    @black_king_pos = black_king_pos
+    @grid = grid == {} ? default_board : grid
     setup_piece
   end
 
@@ -157,6 +157,44 @@ class Board
       @grid[des] = Bishop.new(color)
     when 'N'
       @grid[des] = Knight.new(color)
+    end
+  end
+
+  def serialize
+    data = {
+      'white_king_pos' => @white_king_pos,
+      'black_king_pos' => @black_king_pos,
+      'grid' => {}
+    }
+    @grid.each do |pos, piece|
+      next if piece.nil?
+
+      data['grid'][pos] = "#{piece.color}_#{piece.class.name.downcase}"
+    end
+    data
+  end
+
+  def deserialize(data)
+    @white_king_pos = data['white_king_pos']
+    @black_king_pos = data['black_king_pos']
+    clear
+    data['grid'].each do |pos, piece|
+      color, type = piece.split('_')
+      color = color.to_sym
+      case type
+      when 'queen'
+        @grid[pos] = Queen.new(color)
+      when 'rook'
+        @grid[pos] = Rook.new(color)
+      when 'bishop'
+        @grid[pos] = Bishop.new(color)
+      when 'knight'
+        @grid[pos] = Knight.new(color)
+      when 'pawn'
+        @grid[pos] = Pawn.new(color)
+      when 'king'
+        @grid[pos] = King.new(color)
+      end
     end
   end
 

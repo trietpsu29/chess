@@ -59,4 +59,61 @@ describe Game do
       expect(game.checkmate?(:black, 'e1')).to be true
     end
   end
+
+  describe '#save' do
+    it 'serializes board and writes save data into file' do
+      expect(game.board).to receive(:serialize).and_return({})
+
+      expect(File).to receive(:write)
+        .with('save.json', anything)
+
+      game.save
+    end
+  end
+
+  describe '#load' do
+    it 'calls deserialize on board' do
+      data = {
+        'turn' => 'black',
+        'board' => {}
+      }
+
+      expect(game.board).to receive(:deserialize)
+        .with(data['board'])
+
+      game.load(JSON.dump(data))
+    end
+
+    it 'updates game data from saved data' do
+      data = {
+        'turn' => 'black',
+        'board' => {}
+      }
+
+      allow(game.board).to receive(:deserialize)
+
+      game.load(JSON.dump(data))
+
+      expect(game.turn).to eq('black')
+    end
+
+    it 'restores board state from saved data' do
+      data = {
+        'turn' => 'black',
+        'board' => {
+          'white_king_pos' => 'e1',
+          'black_king_pos' => 'e8',
+          'grid' => {
+            'a1' => 'white_rook'
+          }
+        }
+      }
+
+      game.load(JSON.dump(data))
+
+      expect(game.board.grid['a1']).to be_a(Rook)
+      expect(game.board.white_king_pos).to eq('e1')
+      expect(game.board.black_king_pos).to eq('e8')
+    end
+  end
 end
