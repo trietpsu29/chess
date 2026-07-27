@@ -138,6 +138,28 @@ class Board
     move_piece(curr_rook_pos, next_rook_pos)
   end
 
+  def check_promo(player, start, des)
+    return false unless @grid[start].is_a?(Pawn)
+    return true if player == :black && des[1] == '1'
+    return true if player == :white && des[1] == '8'
+
+    false
+  end
+
+  def promo_pawn(des, choice)
+    color = @grid[des].color
+    case choice
+    when 'Q'
+      @grid[des] = Queen.new(color)
+    when 'R'
+      @grid[des] = Rook.new(color)
+    when 'B'
+      @grid[des] = Bishop.new(color)
+    when 'N'
+      @grid[des] = Knight.new(color)
+    end
+  end
+
   private
 
   def default_board

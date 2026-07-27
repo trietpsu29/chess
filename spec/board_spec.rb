@@ -230,4 +230,71 @@ describe Board do
       expect(board.grid['a1']).to be_nil
     end
   end
+
+  require_relative '../lib/board'
+
+  describe Board do
+    subject(:board) { described_class.new }
+
+    before do
+      board.clear
+    end
+
+    describe '#check_promo' do
+      it 'returns false when the piece is not a pawn' do
+        board.grid['a7'] = Queen.new(:white)
+
+        expect(board.check_promo(:white, 'a7', 'a8')).to be false
+      end
+
+      it 'returns true when black pawn reaches rank 1' do
+        board.grid['a2'] = Pawn.new(:black)
+
+        expect(board.check_promo(:black, 'a2', 'a1')).to be true
+      end
+
+      it 'returns true when white pawn reaches rank 8' do
+        board.grid['a7'] = Pawn.new(:white)
+
+        expect(board.check_promo(:white, 'a7', 'a8')).to be true
+      end
+
+      it 'returns false when pawn has not reached promotion rank' do
+        board.grid['a6'] = Pawn.new(:white)
+
+        expect(board.check_promo(:white, 'a6', 'a7')).to be false
+      end
+    end
+
+    describe '#promo_pawn' do
+      before do
+        board.grid['a8'] = Pawn.new(:white)
+      end
+
+      it 'promotes pawn to queen' do
+        board.promo_pawn('a8', 'Q')
+
+        expect(board.grid['a8']).to be_a(Queen)
+        expect(board.grid['a8'].color).to eq(:white)
+      end
+
+      it 'promotes pawn to rook' do
+        board.promo_pawn('a8', 'R')
+
+        expect(board.grid['a8']).to be_a(Rook)
+      end
+
+      it 'promotes pawn to bishop' do
+        board.promo_pawn('a8', 'B')
+
+        expect(board.grid['a8']).to be_a(Bishop)
+      end
+
+      it 'promotes pawn to knight' do
+        board.promo_pawn('a8', 'N')
+
+        expect(board.grid['a8']).to be_a(Knight)
+      end
+    end
+  end
 end
