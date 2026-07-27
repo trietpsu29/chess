@@ -105,6 +105,8 @@ exit  - Exit the game
 
 The game uses JSON serialization to save and restore game states.
 
+Saved games are stored as JSON files inside the game directory.
+
 Saved data includes:
 
 - Current turn
