@@ -7,9 +7,11 @@ require_relative 'rook'
 require_relative 'piece'
 
 class Board
-  attr_accessor :grid
+  attr_accessor :grid, :white_king_pos, :black_king_pos
 
   def initialize
+    @white_king_pos = 'e1'
+    @black_king_pos = 'e8'
     @grid = default_board
     setup_piece
   end
@@ -65,6 +67,9 @@ class Board
   def move_piece(start, des)
     @grid[des] = @grid[start]
     @grid[start] = nil
+
+    @white_king_pos = des if @grid[des].is_a?(King) && grid[des].color == :white
+    @black_king_pos = des if @grid[des].is_a?(King) && grid[des].color == :black
   end
 
   def clear
