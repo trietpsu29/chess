@@ -138,7 +138,7 @@ class Board
     move_piece(curr_rook_pos, next_rook_pos)
   end
 
-  def check_promo(player, start, des)
+  def check_promo?(player, start, des)
     return false unless @grid[start].is_a?(Pawn)
     return true if player == :black && des[1] == '1'
     return true if player == :white && des[1] == '8'
