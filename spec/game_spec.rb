@@ -44,6 +44,21 @@ describe Game do
       expect(game.checkmate?(:black, 'e1')).to be false
     end
 
+    it 'returns false when king has no moves but is not in check' do
+      king = King.new(:white)
+
+      pawn1 = Pawn.new(:white)
+      pawn2 = Pawn.new(:white)
+      pawn3 = Pawn.new(:white)
+
+      game.board.grid['e1'] = king
+      game.board.grid['d1'] = pawn1
+      game.board.grid['d2'] = pawn2
+      game.board.grid['e2'] = pawn3
+
+      expect(game.checkmate?(:black, 'e1')).to be false
+    end
+
     it 'returns true when king has no available move' do
       king = King.new(:white)
 

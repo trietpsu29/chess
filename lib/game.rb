@@ -1,4 +1,5 @@
 require_relative 'board'
+require_relative 'menu'
 require 'json'
 
 class Game
@@ -9,6 +10,52 @@ class Game
     @turn = :white
   end
 
+  def play
+    loop do
+      play_game
+      puts 'Do you want to play another new game? 1.Yes 0.No'
+      choice = gets.chomp
+      break if choice == '0'
+    end
+  end
+
+  def play_game
+    menu = Menu.new
+    @board.display
+    loop do
+      start, des = make_move(turn)
+      king_pos = turn == :white ? @board.black_king_pos : @board.white_king_pos
+      check = check?(turn, king_pos)
+      checkmate = checkmate?(turn, king_pos)
+      if @board.check_promo?(turn, start, des)
+        menu.promotion_menu
+        choice = gets.chomp
+        @board.promo_pawn(des, choice)
+      end
+      menu.declare_check(check, checkmate, turn)
+      @turn = turn == :white ? :black : :white
+      next unless checkmate
+
+      @turn = :white
+      @board = Board.new
+      return
+    end
+  end
+
+  def make_move(player)
+    loop do
+      puts "#{player.capitalize}'s turn. Choose a position(start end):"
+      pos = gets.chomp
+      start, des = pos.split(' ')
+      if @board.check_valid_move?(player, start, des)
+        @board.move_piece(start, des)
+        @board.display
+        return [start, des]
+      end
+      puts 'Please choose a valid move!'
+    end
+  end
+
   def check?(player, king_pos)
     @board.grid.each do |pos, piece|
       return true if !piece.nil? && piece.color == player && @board.check_valid_move?(player, pos, king_pos)
@@ -17,6 +64,8 @@ class Game
   end
 
   def checkmate?(player, king_pos)
+    return false unless check?(player, king_pos)
+
     king_col = king_pos[0].ord
     king_row = king_pos[1].to_i
     king_moves = ["#{king_col.chr}#{king_row + 1}", "#{king_col.chr}#{king_row - 1}", "#{(king_col + 1).chr}#{king_row}",
