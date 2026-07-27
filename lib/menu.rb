@@ -3,6 +3,7 @@ require_relative 'game'
 class Menu
   def initialize
     @running = true
+    @game = Game.new
   end
 
   def start
@@ -16,7 +17,7 @@ class Menu
       when '2'
         load_game
       when '3'
-        quit
+        exit
       else
         puts 'Invalid option!'
       end
@@ -32,13 +33,6 @@ class Menu
       N: Knight
     PROMO
   end
-
-  def declare_check(check, checkmate, player)
-    puts 'Check!' if check
-    puts "Checkmate! #{player.capitalize} wins" if checkmate
-  end
-
-  private
 
   def display_menu
     puts <<~CHESS
@@ -91,8 +85,7 @@ class Menu
 
   def start_player_game
     puts 'Player vs Player'
-    game = Game.new
-    game.play
+    @game.play_game
   end
 
   def start_ai_game
@@ -101,12 +94,8 @@ class Menu
   end
 
   def load_game
-    # TODO: load saved game
     puts 'Load game'
-  end
-
-  def quit
-    puts 'Thanks for playing Chess!'
-    @running = false
+    @game.load(File.read('save.json'))
+    @game.play_game
   end
 end

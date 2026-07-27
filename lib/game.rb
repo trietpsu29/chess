@@ -10,20 +10,14 @@ class Game
     @turn = :white
   end
 
-  def play
-    loop do
-      play_game
-      puts 'Do you want to play another new game? 1.Yes 0.No'
-      choice = gets.chomp
-      break if choice == '0'
-    end
-  end
-
   def play_game
-    menu = Menu.new
     @board.display
     loop do
-      start, des = make_move(turn)
+      input = make_turn(turn)
+      return unless input
+
+      start, des = input
+
       king_pos = turn == :white ? @board.black_king_pos : @board.white_king_pos
       check = check?(turn, king_pos)
       checkmate = checkmate?(turn, king_pos)
@@ -42,17 +36,42 @@ class Game
     end
   end
 
-  def make_move(player)
+  def make_turn(player)
     loop do
-      puts "#{player.capitalize}'s turn. Choose a position(start end):"
-      pos = gets.chomp
-      start, des = pos.split(' ')
-      if @board.check_valid_move?(player, start, des)
-        @board.move_piece(start, des)
-        @board.display
-        return [start, des]
+      turn_menu(player)
+      input = gets.chomp
+
+      case input
+      when 'save'
+        save
+        puts 'Game saved!'
+        next
+
+      when 'menu'
+        puts 'Warning: Current game will be lost.'
+        puts 'Return to main menu? (y/n)'
+
+        confirm = gets.chomp
+
+        return nil if confirm == 'y'
+
+      when 'exit'
+        puts 'Are you sure you want to exit? (y/n)'
+
+        confirm = gets.chomp
+
+        exit if confirm == 'y'
+
+      else
+        start, des = input.split
+
+        if @board.check_valid_move?(player, start, des)
+          @board.move_piece(start, des)
+          return [start, des]
+        end
+
+        puts 'Invalid move!'
       end
-      puts 'Please choose a valid move!'
     end
   end
 
@@ -93,5 +112,29 @@ class Game
     data = JSON.load(string)
     @turn = data['turn']
     @board.deserialize(data['board'])
+  end
+
+  def turn_menu(player)
+    puts <<~MENU
+
+      ╔══════════════════════════════╗
+           ♟ CHESS - #{player.capitalize} TURN ♟
+      ╚══════════════════════════════╝
+
+      Enter your move:
+        Example: e2 e4
+
+      Commands:
+        save - Save current game
+        menu - Return to main menu (game will not be saved)
+        exit - Exit game (game will not be saved)
+
+      >
+    MENU
+  end
+
+  def declare_check(check, checkmate, player)
+    puts 'Check!' if check
+    puts "Checkmate! #{player.capitalize} wins" if checkmate
   end
 end
