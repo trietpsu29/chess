@@ -98,6 +98,46 @@ class Board
     puts
   end
 
+  def check_kingside_castling?(player)
+    empty_space = player == :white ? %w[f1 g1] : %w[f8 g8]
+    rook_pos = player == :white ? 'h1' : 'h8'
+
+    return false unless empty_space.all? { |n| @grid[n].nil? }
+    return false unless @grid[rook_pos].is_a?(Rook)
+
+    true
+  end
+
+  def check_queenside_castling?(player)
+    empty_space = player == :white ? %w[b1 c1 d1] : %w[b8 c8 d8]
+    rook_pos = player == :white ? 'a1' : 'a8'
+
+    return false unless empty_space.all? { |n| @grid[n].nil? }
+    return false unless @grid[rook_pos].is_a?(Rook)
+
+    true
+  end
+
+  def kingside_castling(player)
+    cur_king_pos = player == :white ? 'e1' : 'e8'
+    curr_rook_pos = player == :white ? 'h1' : 'h8'
+    next_king_pos = player == :white ? 'g1' : 'g8'
+    next_rook_pos = player == :white ? 'f1' : 'f8'
+
+    move_piece(cur_king_pos, next_king_pos)
+    move_piece(curr_rook_pos, next_rook_pos)
+  end
+
+  def queenside_castling(player)
+    cur_king_pos = player == :white ? 'e1' : 'e8'
+    curr_rook_pos = player == :white ? 'a1' : 'a8'
+    next_king_pos = player == :white ? 'c1' : 'c8'
+    next_rook_pos = player == :white ? 'd1' : 'd8'
+
+    move_piece(cur_king_pos, next_king_pos)
+    move_piece(curr_rook_pos, next_rook_pos)
+  end
+
   private
 
   def default_board

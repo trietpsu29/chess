@@ -158,4 +158,76 @@ describe Board do
       expect(board.check_valid_move?(:white, 'a1', 'a8')).to be true
     end
   end
+
+  describe '#check_kingside_castling?' do
+    it 'returns true when spaces are empty and rook exists' do
+      board.grid['h1'] = Rook.new(:white)
+
+      expect(board.check_kingside_castling?(:white)).to be true
+    end
+
+    it 'returns false when there is a piece between king and rook' do
+      board.grid['f1'] = Pawn.new(:white)
+      board.grid['h1'] = Rook.new(:white)
+
+      expect(board.check_kingside_castling?(:white)).to be false
+    end
+
+    it 'returns false when rook does not exist' do
+      expect(board.check_kingside_castling?(:white)).to be false
+    end
+  end
+
+  describe '#check_queenside_castling?' do
+    it 'returns true when spaces are empty and rook exists' do
+      board.grid['a1'] = Rook.new(:white)
+
+      expect(board.check_queenside_castling?(:white)).to be true
+    end
+
+    it 'returns false when there is a piece between king and rook' do
+      board.grid['c1'] = Pawn.new(:white)
+      board.grid['a1'] = Rook.new(:white)
+
+      expect(board.check_queenside_castling?(:white)).to be false
+    end
+
+    it 'returns false when rook does not exist' do
+      expect(board.check_queenside_castling?(:white)).to be false
+    end
+  end
+
+  describe '#kingside_castling' do
+    it 'moves king and rook to correct positions' do
+      king = King.new(:white)
+      rook = Rook.new(:white)
+
+      board.grid['e1'] = king
+      board.grid['h1'] = rook
+
+      board.kingside_castling(:white)
+
+      expect(board.grid['g1']).to eq king
+      expect(board.grid['f1']).to eq rook
+      expect(board.grid['e1']).to be_nil
+      expect(board.grid['h1']).to be_nil
+    end
+  end
+
+  describe '#queenside_castling' do
+    it 'moves king and rook to correct positions' do
+      king = King.new(:white)
+      rook = Rook.new(:white)
+
+      board.grid['e1'] = king
+      board.grid['a1'] = rook
+
+      board.queenside_castling(:white)
+
+      expect(board.grid['c1']).to eq king
+      expect(board.grid['d1']).to eq rook
+      expect(board.grid['e1']).to be_nil
+      expect(board.grid['a1']).to be_nil
+    end
+  end
 end
