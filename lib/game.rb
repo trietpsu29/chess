@@ -3,30 +3,31 @@ require_relative 'menu'
 require 'json'
 
 class Game
-  attr_accessor :board, :turn
+  attr_accessor :board, :turn, :ai
 
-  def initialize
+  def initialize(ai = nil)
     @board = Board.new
     @turn = :white
+    @ai = ai
   end
 
   def play_game
-    @board.display
     loop do
-      input = make_turn(turn)
+      @board.display
+      input = @turn == @ai ? ai_turn : make_turn
       return unless input
 
       start, des = input
 
       king_pos = turn == :white ? @board.black_king_pos : @board.white_king_pos
-      check = check?(turn, king_pos)
-      checkmate = checkmate?(turn, king_pos)
-      if @board.check_promo?(turn, start, des)
+      check = check?(king_pos)
+      checkmate = checkmate?(king_pos)
+      if @board.check_promo?(start, des, @turn)
         menu.promotion_menu
         choice = gets.chomp
         @board.promo_pawn(des, choice)
       end
-      menu.declare_check(check, checkmate, turn)
+      declare_check(check, checkmate)
       @turn = turn == :white ? :black : :white
       next unless checkmate
 
@@ -36,9 +37,9 @@ class Game
     end
   end
 
-  def make_turn(player)
+  def make_turn
     loop do
-      turn_menu(player)
+      turn_menu
       input = gets.chomp
 
       case input
@@ -65,7 +66,7 @@ class Game
       else
         start, des = input.split
 
-        if @board.check_valid_move?(player, start, des)
+        if @board.check_valid_move?(@turn, start, des)
           @board.move_piece(start, des)
           return [start, des]
         end
@@ -75,15 +76,15 @@ class Game
     end
   end
 
-  def check?(player, king_pos)
+  def check?(king_pos)
     @board.grid.each do |pos, piece|
-      return true if !piece.nil? && piece.color == player && @board.check_valid_move?(player, pos, king_pos)
+      return true if !piece.nil? && piece.color == @turn && @board.check_valid_move?(@turn, pos, king_pos)
     end
     false
   end
 
-  def checkmate?(player, king_pos)
-    return false unless check?(player, king_pos)
+  def checkmate?(king_pos)
+    return false unless check?(king_pos)
 
     king_col = king_pos[0].ord
     king_row = king_pos[1].to_i
@@ -94,7 +95,7 @@ class Game
 
       pos_piece = @board.grid[pos]
       @board.move_piece(king_pos, pos)
-      check_king = check?(player, pos)
+      check_king = check?(pos)
       @board.move_piece(pos, king_pos)
       @board.grid[pos] = pos_piece
 
@@ -105,21 +106,27 @@ class Game
 
   def save
     File.write('save.json', JSON.dump({ turn: @turn,
+                                        ai: @ai,
                                         board: @board.serialize }))
   end
 
   def load(string)
     data = JSON.load(string)
     @turn = data['turn']
+    @ai = data['ai']
     @board.deserialize(data['board'])
   end
 
-  def turn_menu(player)
+  def turn_menu(ai = nil)
     puts <<~MENU
-
       ╔══════════════════════════════╗
-           ♟ CHESS - #{player.capitalize} TURN ♟
+           ♟ CHESS - #{@turn.capitalize} TURN ♟
       ╚══════════════════════════════╝
+    MENU
+
+    return if ai
+
+    puts <<~MENU
 
       Enter your move:
         Example: e2 e4
@@ -133,8 +140,32 @@ class Game
     MENU
   end
 
-  def declare_check(check, checkmate, player)
+  def declare_check(check, checkmate)
     puts 'Check!' if check
-    puts "Checkmate! #{player.capitalize} wins" if checkmate
+    puts "Checkmate! #{@turn.capitalize} wins" if checkmate
+  end
+
+  def ai_turn
+    turn_menu('ai')
+    ai_pieces = find_ai_pieces
+    des_move = @board.grid.keys - ai_pieces
+    visited = []
+    loop do
+      start = ai_pieces.sample
+      des = des_move.sample
+      next if visited.include?([start, des])
+
+      if @board.check_valid_move?(@ai, start, des)
+        @board.move_piece(start, des)
+        return [start, des]
+      end
+      visited << [start, des]
+    end
+  end
+
+  def find_ai_pieces
+    @board.grid.filter_map do |pos, piece|
+      pos if piece&.color == @ai
+    end
   end
 end

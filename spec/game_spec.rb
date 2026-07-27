@@ -10,26 +10,26 @@ describe Game do
   describe '#check?' do
     it 'returns true when a piece can attack king position' do
       rook = Rook.new(:black)
-
+      game.turn = :black
       game.board.grid['a8'] = rook
 
-      expect(game.check?(:black, 'a1')).to be true
+      expect(game.check?('a1')).to be true
     end
 
     it 'returns false when no piece can attack king position' do
       rook = Rook.new(:black)
-
+      game.turn = :black
       game.board.grid['a8'] = rook
 
-      expect(game.check?(:black, 'h1')).to be false
+      expect(game.check?('h1')).to be false
     end
 
     it 'does not count pieces from another color' do
       rook = Rook.new(:white)
-
+      game.turn = :black
       game.board.grid['a8'] = rook
 
-      expect(game.check?(:black, 'a1')).to be false
+      expect(game.check?('a1')).to be false
     end
   end
 
@@ -37,11 +37,12 @@ describe Game do
     it 'returns false when king has an available move' do
       king = King.new(:white)
       rook = Rook.new(:black)
+      game.turn = :black
 
       game.board.grid['e1'] = king
       game.board.grid['e8'] = rook
 
-      expect(game.checkmate?(:black, 'e1')).to be false
+      expect(game.checkmate?('e1')).to be false
     end
 
     it 'returns false when king has no moves but is not in check' do
@@ -50,13 +51,14 @@ describe Game do
       pawn1 = Pawn.new(:white)
       pawn2 = Pawn.new(:white)
       pawn3 = Pawn.new(:white)
+      game.turn = :black
 
       game.board.grid['e1'] = king
       game.board.grid['d1'] = pawn1
       game.board.grid['d2'] = pawn2
       game.board.grid['e2'] = pawn3
 
-      expect(game.checkmate?(:black, 'e1')).to be false
+      expect(game.checkmate?('e1')).to be false
     end
 
     it 'returns true when king has no available move' do
@@ -65,13 +67,14 @@ describe Game do
       rook1 = Rook.new(:black)
       rook2 = Rook.new(:black)
       rook3 = Rook.new(:black)
+      game.turn = :black
 
       game.board.grid['e1'] = king
       game.board.grid['e2'] = rook1
       game.board.grid['d2'] = rook2
       game.board.grid['f2'] = rook3
 
-      expect(game.checkmate?(:black, 'e1')).to be true
+      expect(game.checkmate?('e1')).to be true
     end
   end
 
@@ -90,6 +93,7 @@ describe Game do
     it 'calls deserialize on board' do
       data = {
         'turn' => 'black',
+        'ai' => 'black',
         'board' => {}
       }
 
@@ -102,6 +106,7 @@ describe Game do
     it 'updates game data from saved data' do
       data = {
         'turn' => 'black',
+        'ai' => 'black',
         'board' => {}
       }
 
@@ -110,11 +115,13 @@ describe Game do
       game.load(JSON.dump(data))
 
       expect(game.turn).to eq('black')
+      expect(game.ai).to eq('black')
     end
 
     it 'restores board state from saved data' do
       data = {
         'turn' => 'black',
+        'ai' => 'black',
         'board' => {
           'white_king_pos' => 'e1',
           'black_king_pos' => 'e8',

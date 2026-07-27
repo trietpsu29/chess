@@ -3,7 +3,7 @@ require_relative 'game'
 class Menu
   def initialize
     @running = true
-    @game = Game.new
+    @game = nil
   end
 
   def start
@@ -85,16 +85,25 @@ class Menu
 
   def start_player_game
     puts 'Player vs Player'
+    @game = Game.new
     @game.play_game
   end
 
   def start_ai_game
-    # TODO: create game with computer
     puts 'Player vs Computer'
+    puts 'Who go first? 1.Human 0.Computer'
+    choice = gets.chomp
+    @game = if choice == '0'
+              Game.new(:white)
+            else
+              Game.new(:black)
+            end
+    @game.play_game
   end
 
   def load_game
     puts 'Load game'
+    @game = Game.new
     @game.load(File.read('save.json'))
     @game.play_game
   end
