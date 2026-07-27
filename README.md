@@ -1,6 +1,6 @@
 # ♟️ Chess
 
-This is the project from [The Odin Project](https://github.com/TheOdinProject) Ruby curriculum — a command line Chess game built with Ruby.
+This is the project from [The Odin Project](https://github.com/TheOdinProject) Ruby curriculum — a command-line Chess game built with Ruby.
 
 The game supports player vs player mode, player vs computer mode, saving/loading games, and various chess rules including check, checkmate, castling, and pawn promotion.
 
