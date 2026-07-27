@@ -211,27 +211,27 @@ class Board
   end
 
   def setup_piece
-    @grid[:a8] = Rook.new(:black)
-    @grid[:b8] = Knight.new(:black)
-    @grid[:c8] = Bishop.new(:black)
-    @grid[:d8] = Queen.new(:black)
-    @grid[:e8] = King.new(:black)
-    @grid[:f8] = Bishop.new(:black)
-    @grid[:g8] = Knight.new(:black)
-    @grid[:h8] = Rook.new(:black)
+    @grid['a8'] = Rook.new(:black)
+    @grid['b8'] = Knight.new(:black)
+    @grid['c8'] = Bishop.new(:black)
+    @grid['d8'] = Queen.new(:black)
+    @grid['e8'] = King.new(:black)
+    @grid['f8'] = Bishop.new(:black)
+    @grid['g8'] = Knight.new(:black)
+    @grid['h8'] = Rook.new(:black)
 
-    @grid[:a1] = Rook.new(:white)
-    @grid[:b1] = Knight.new(:white)
-    @grid[:c1] = Bishop.new(:white)
-    @grid[:d1] = Queen.new(:white)
-    @grid[:e1] = King.new(:white)
-    @grid[:f1] = Bishop.new(:white)
-    @grid[:g1] = Knight.new(:white)
-    @grid[:h1] = Rook.new(:white)
+    @grid['a1'] = Rook.new(:white)
+    @grid['b1'] = Knight.new(:white)
+    @grid['c1'] = Bishop.new(:white)
+    @grid['d1'] = Queen.new(:white)
+    @grid['e1'] = King.new(:white)
+    @grid['f1'] = Bishop.new(:white)
+    @grid['g1'] = Knight.new(:white)
+    @grid['h1'] = Rook.new(:white)
 
     ('a'..'h').each do |file|
-      @grid[:"#{file}2"] = Pawn.new(:white)
-      @grid[:"#{file}7"] = Pawn.new(:black)
+      @grid["#{file}2"] = Pawn.new(:white)
+      @grid["#{file}7"] = Pawn.new(:black)
     end
   end
 end
