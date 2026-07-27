@@ -112,8 +112,10 @@ class Game
 
   def load(string)
     data = JSON.load(string)
-    @turn = data['turn']
+    @turn = data['turn'].to_sym
     @ai = data['ai']
+    @ai.to_sym unless @ai.nil?
+
     @board.deserialize(data['board'])
   end
 
