@@ -77,24 +77,36 @@ class Board
   end
 
   def display
+    light_square = "\e[48;5;180m"
+    dark_square = "\e[48;5;137m"
+    white_piece = "\e[38;5;255m"
+    black_piece = "\e[38;5;16m"
+    reset = "\e[0m"
+
     8.downto(1) do |row|
       print "#{row} "
 
       ('a'..'h').each do |col|
         piece = @grid["#{col}#{row}"]
 
+        square_color = ((col.ord - 'a'.ord + row) % 2).zero? ? light_square : dark_square
+
         if piece.nil?
-          print '. '
+          symbol = ' '
+          piece_color = ''
         else
-          print "#{piece.symbol} "
+          symbol = piece.symbol
+          piece_color = piece.color == :white ? white_piece : black_piece
         end
+
+        print "#{square_color}#{piece_color} #{symbol} #{reset}"
       end
 
       puts
     end
 
     print '  '
-    ('a'..'h').each { |col| print "#{col} " }
+    ('a'..'h').each { |col| print " #{col} " }
     puts
   end
 
