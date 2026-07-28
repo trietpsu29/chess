@@ -12,24 +12,17 @@ class Game
   end
 
   def play_game
+    @board.display
     loop do
-      @board.display
       input = @turn == @ai ? ai_turn : make_turn
       return unless input
 
       start, des = input
+      promo_turn(start, des)
 
-      king_pos = turn == :white ? @board.black_king_pos : @board.white_king_pos
-      check = check?(king_pos)
-      checkmate = checkmate?(king_pos)
-      if @board.check_promo?(start, des, @turn)
-        menu.promotion_menu
-        choice = gets.chomp
-        @board.promo_pawn(des, choice)
-      end
-      declare_check(check, checkmate)
-      @turn = turn == :white ? :black : :white
-      next unless checkmate
+      checked = check_turn?
+      @turn = @turn == :white ? :black : :white
+      next unless checked
 
       @turn = :white
       @board = Board.new
@@ -47,6 +40,8 @@ class Game
         save
         puts 'Game saved!'
         next
+      when 'castle'
+        castling
 
       when 'menu'
         puts 'Warning: Current game will be lost.'
@@ -68,11 +63,83 @@ class Game
 
         if @board.check_valid_move?(@turn, start, des)
           @board.move_piece(start, des)
+          @board.display
           return [start, des]
         end
 
         puts 'Invalid move!'
       end
+    end
+  end
+
+  def promo_turn(start, des)
+    return unless @board.check_promo?(start, des, @turn)
+
+    menu.promotion_menu if @turn != @ai
+    choice = @turn == @ai ? %w[Q R B N].sample : gets.chomp
+    @board.promo_pawn(des, choice)
+    puts 'Pawn promoted!'
+    @board.display
+  end
+
+  def check_turn?
+    king_pos = @turn == :white ? @board.black_king_pos : @board.white_king_pos
+    check = check?(king_pos)
+    checkmate = checkmate?(king_pos)
+    declare_check(check, checkmate)
+    checkmate
+  end
+
+  def castling_menu
+    puts <<~MENU
+
+      ╔══════════════════════════════╗
+            ♟ CASTLING ♟
+      ╚══════════════════════════════╝
+
+      Choose castling side:
+
+        1. Kingside (O-O)
+        2. Queenside (O-O-O)
+        0. Cancel
+
+    MENU
+  end
+
+  def castling
+    castling_menu if @turn != @ai
+    choice = @turn == @ai ? rand(0..2) : gets.chomp
+
+    case choice
+    when '1'
+      if @board.check_kingside_castling?(@turn)
+        @board.kingside_castling(@turn)
+        puts 'Kingside castling performed!'
+        @board.display
+        true
+      else
+        puts 'Cannot perform kingside castling!' if @turn != @ai
+        false
+      end
+
+    when '2'
+      if @board.check_queenside_castling?(@turn)
+        @board.queenside_castling(@turn)
+        puts 'Queenside castling performed!'
+        @board.display
+        true
+      else
+        puts 'Cannot perform queenside castling!' if @turn != @ai
+        false
+      end
+
+    when '0'
+      puts 'Cancel castling.' if @turn != @ai
+      false
+
+    else
+      puts 'Invalid choice!'
+      false
     end
   end
 
@@ -114,8 +181,7 @@ class Game
     data = JSON.load(string)
     @turn = data['turn'].to_sym
     @ai = data['ai']
-    @ai.to_sym unless @ai.nil?
-
+    @ai = @ai.to_sym unless @ai.nil?
     @board.deserialize(data['board'])
   end
 
@@ -135,6 +201,7 @@ class Game
 
       Commands:
         save - Save current game
+        castle - Perform castling
         menu - Return to main menu (game will not be saved)
         exit - Exit game (game will not be saved)
 
@@ -159,6 +226,8 @@ class Game
 
       if @board.check_valid_move?(@ai, start, des)
         @board.move_piece(start, des)
+        puts "#{start} #{des}"
+        @board.display
         return [start, des]
       end
       visited << [start, des]
